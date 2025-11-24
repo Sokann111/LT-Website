@@ -1,10 +1,29 @@
 import { useState } from "react";
 import { Box, Button, TextField, Typography, Paper } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";  // Import the AuthContext for login
+import { authService } from "../../services/auth.service";  // Import the authService
 
 export default function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null); // For handling errors
+  const { login } = useAuth(); // To log the user in after registration
+  const navigate = useNavigate();  // To navigate after successful registration
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const res = await authService.register(username, password);
+      
+      login(res); 
+      
+      navigate("/");  
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Registration failed");
+    }
+  };
 
   return (
     <Box
@@ -15,6 +34,7 @@ export default function Register() {
         justifyContent: "center",
         alignItems: "center",
         padding: 2,
+        borderRadius: "12px",
       }}
     >
       <Paper
@@ -31,6 +51,8 @@ export default function Register() {
         <Typography variant="h5" fontWeight="bold" color="primary">
           Create Account 💗
         </Typography>
+
+        {error && <Typography color="error">{error}</Typography>} {/* Show error message */}
 
         <Typography sx={{ mt: 1, mb: 3, color: "#555" }}>
           Join the cosmetic product platform
@@ -68,6 +90,7 @@ export default function Register() {
               bgcolor: "#ff4f95",
             },
           }}
+          onClick={handleSubmit}
         >
           Register
         </Button>

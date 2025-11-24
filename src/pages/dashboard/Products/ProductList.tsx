@@ -3,11 +3,13 @@ import { Box, Button, Paper, Typography } from "@mui/material";
 import Layout from "../../../components/layout/Layout";
 import { Product } from "../../../types/product";
 import { productService } from "../../../services/product.service";
-import { useNavigate } from "react-router-dom";
+import ProductCreateModal from "./ProductCreate";
+import ProductEditModal from "./ProductEdit";
 
 export default function ProductList() {
   const [products, setProducts] = useState<Product[]>([]);
-  const navigate = useNavigate();
+  const [openCreate, setOpenCreate] = useState(false);
+  const [editItem, setEditItem] = useState<Product | null>(null);
 
   useEffect(() => {
     loadData();
@@ -20,6 +22,7 @@ export default function ProductList() {
 
   return (
     <Layout>
+      {/* Header */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
         <Typography variant="h4" fontWeight="bold" color="primary">
           Products 💄
@@ -31,12 +34,13 @@ export default function ProductList() {
             bgcolor: "#ff80ab",
             "&:hover": { bgcolor: "#ff4f95" },
           }}
-          onClick={() => navigate("/products/create")}
+          onClick={() => setOpenCreate(true)}
         >
           + Add Product
         </Button>
       </Box>
 
+      {/* Product Cards */}
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
         {products.map((item) => (
           <Paper
@@ -52,15 +56,14 @@ export default function ProductList() {
             <Typography variant="h6" color="secondary">
               {item.name}
             </Typography>
-            <Typography variant="body1" sx={{ mt: 1 }}>
-              Price: <b>${item.price}</b>
-            </Typography>
+            <Typography sx={{ mt: 1 }}>💲 {item.price}</Typography>
 
+            {/* Edit & Delete buttons */}
             <Box sx={{ mt: 2, display: "flex", gap: 1, justifyContent: "center" }}>
               <Button
                 size="small"
                 variant="outlined"
-                onClick={() => navigate(`/products/edit/${item.id}`)}
+                onClick={() => setEditItem(item)}
               >
                 Edit
               </Button>
@@ -69,7 +72,9 @@ export default function ProductList() {
                 size="small"
                 color="error"
                 variant="outlined"
-                onClick={() => productService.remove(String(item.id)).then(loadData)}
+                onClick={() =>
+                  productService.remove(String(item.id)).then(loadData)
+                }
               >
                 Delete
               </Button>
@@ -77,6 +82,23 @@ export default function ProductList() {
           </Paper>
         ))}
       </Box>
+
+      {/* CREATE MODAL */}
+      <ProductCreateModal
+        open={openCreate}
+        onClose={() => setOpenCreate(false)}
+        refresh={loadData}
+      />
+
+      {/* EDIT MODAL */}
+      {editItem && (
+        <ProductEditModal
+          open={!!editItem}
+          onClose={() => setEditItem(null)}
+          product={editItem}
+          refresh={loadData}
+        />
+      )}
     </Layout>
   );
 }

@@ -1,60 +1,39 @@
-import { useState, useEffect } from "react";
-import { Box, Button, Paper, TextField, Typography } from "@mui/material";
-import Layout from "../../../components/layout/Layout";
+import { useState } from "react";
+import { Button, TextField } from "@mui/material";
+import PinkDialog from "../../../components/ui/PinkDialog";
 import { categoryService } from "../../../services/category.service";
-import { useParams, useNavigate } from "react-router-dom";
 
-export default function CategoryEdit() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+export default function CategoryEdit({ open, onClose, category, refresh }: any) {
+  const [name, setName] = useState(category.name);
 
-  const [name, setName] = useState("");
-
-  useEffect(() => {
-    loadDetail();
-  }, []);
-
-  const loadDetail = async () => {
-    const all = await categoryService.getAll();
-    const found = all.find((c: any) => String(c.id) === id);
-    if (found) {
-      setName(found.name);
-    }
-  };
-
-  const handleSave = async () => {
-    await categoryService.update(String(id), { name });
-    navigate("/categories");
+  const save = async () => {
+    await categoryService.update(String(category.id), { name });
+    refresh();
+    onClose();
   };
 
   return (
-    <Layout>
-      <Paper sx={{ padding: 4, maxWidth: 400 }}>
-        <Typography variant="h5" color="primary" fontWeight="bold">
-          Edit Category 💗
-        </Typography>
+    <PinkDialog open={open} onClose={onClose} title="Edit Category 💗">
+      <TextField
+        label="Category Name"
+        fullWidth
+        sx={{ mb: 2 }}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
 
-        <TextField
-          label="Category Name"
-          fullWidth
-          sx={{ mt: 2 }}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-
-        <Button
-          variant="contained"
-          fullWidth
-          sx={{
-            mt: 3,
-            bgcolor: "#ff80ab",
-            "&:hover": { bgcolor: "#ff4f95" },
-          }}
-          onClick={handleSave}
-        >
-          Save Changes
-        </Button>
-      </Paper>
-    </Layout>
+      <Button
+        variant="contained"
+        fullWidth
+        sx={{
+          mt: 2,
+          bgcolor: "#ff80ab",
+          "&:hover": { bgcolor: "#ff4f95" },
+        }}
+        onClick={save}
+      >
+        Save Changes
+      </Button>
+    </PinkDialog>
   );
 }

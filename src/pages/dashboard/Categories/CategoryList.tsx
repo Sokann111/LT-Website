@@ -3,11 +3,13 @@ import { Box, Button, Paper, Typography } from "@mui/material";
 import Layout from "../../../components/layout/Layout";
 import { Category } from "../../../types/category";
 import { categoryService } from "../../../services/category.service";
-import { useNavigate } from "react-router-dom";
+import CategoryCreateModal from "./CategoryCreate";
+import CategoryEditModal from "./CategoryEdit";
 
 export default function CategoryList() {
   const [categories, setCategories] = useState<Category[]>([]);
-  const navigate = useNavigate();
+  const [openCreate, setOpenCreate] = useState(false);
+  const [editItem, setEditItem] = useState<Category | null>(null);
 
   useEffect(() => {
     loadData();
@@ -20,6 +22,7 @@ export default function CategoryList() {
 
   return (
     <Layout>
+      {/* Header */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
         <Typography variant="h4" fontWeight="bold" color="primary">
           Categories 🌸
@@ -31,12 +34,13 @@ export default function CategoryList() {
             bgcolor: "#ff80ab",
             "&:hover": { bgcolor: "#ff4f95" },
           }}
-          onClick={() => navigate("/categories/create")}
+          onClick={() => setOpenCreate(true)}
         >
           + Add Category
         </Button>
       </Box>
 
+      {/* List */}
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
         {categories.map((item) => (
           <Paper
@@ -57,7 +61,7 @@ export default function CategoryList() {
               <Button
                 size="small"
                 variant="outlined"
-                onClick={() => navigate(`/categories/edit/${item.id}`)}
+                onClick={() => setEditItem(item)}
               >
                 Edit
               </Button>
@@ -66,7 +70,9 @@ export default function CategoryList() {
                 size="small"
                 color="error"
                 variant="outlined"
-                onClick={() => categoryService.remove(String(item.id)).then(loadData)}
+                onClick={() =>
+                  categoryService.remove(String(item.id)).then(loadData)
+                }
               >
                 Delete
               </Button>
@@ -74,6 +80,23 @@ export default function CategoryList() {
           </Paper>
         ))}
       </Box>
+
+      {/* Create Modal */}
+      <CategoryCreateModal
+        open={openCreate}
+        onClose={() => setOpenCreate(false)}
+        refresh={loadData}
+      />
+
+      {/* Edit Modal */}
+      {editItem && (
+        <CategoryEditModal
+          open={!!editItem}
+          onClose={() => setEditItem(null)}
+          category={editItem}
+          refresh={loadData}
+        />
+      )}
     </Layout>
   );
 }

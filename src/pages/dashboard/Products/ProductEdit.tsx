@@ -1,69 +1,47 @@
-import { useState, useEffect } from "react";
-import { Box, Button, Paper, TextField, Typography } from "@mui/material";
-import Layout from "../../../components/layout/Layout";
+import { useState } from "react";
+import { Button, TextField } from "@mui/material";
+import PinkDialog from "../../../components/ui/PinkDialog";
 import { productService } from "../../../services/product.service";
-import { useParams, useNavigate } from "react-router-dom";
 
-export default function ProductEdit() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+export default function ProductEdit({ open, onClose, product, refresh }: any) {
+  const [name, setName] = useState(product.name);
+  const [price, setPrice] = useState(String(product.price));
 
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-
-  useEffect(() => {
-    loadDetail();
-  }, []);
-
-  const loadDetail = async () => {
-    const all = await productService.getAll();
-    const found = all.find((p: any) => String(p.id) === id);
-    if (found) {
-      setName(found.name);
-      setPrice(found.price);
-    }
-  };
-
-  const handleSave = async () => {
-    await productService.update(String(id), {
+  const save = async () => {
+    await productService.update(String(product.id), {
       name,
       price: Number(price),
     });
-    navigate("/products");
+    refresh();
+    onClose();
   };
 
   return (
-    <Layout>
-      <Paper sx={{ padding: 4, maxWidth: 400 }}>
-        <Typography variant="h5" color="primary" fontWeight="bold">
-          Edit Product 💗
-        </Typography>
+    <PinkDialog open={open} onClose={onClose} title="Edit Product 💗">
+      <TextField
+        label="Product Name"
+        fullWidth
+        sx={{ mb: 2 }}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
 
-        <TextField
-          label="Product Name"
-          fullWidth
-          sx={{ mt: 2 }}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+      <TextField
+        label="Price"
+        fullWidth
+        sx={{ mb: 2 }}
+        value={price}
+        onChange={(e) => setPrice(e.target.value)}
+      />
 
-        <TextField
-          label="Price"
-          fullWidth
-          sx={{ mt: 2 }}
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-        />
-
-        <Button
-          variant="contained"
-          fullWidth
-          sx={{ mt: 3, bgcolor: "#ff80ab", "&:hover": { bgcolor: "#ff4f95" } }}
-          onClick={handleSave}
-        >
-          Save Changes
-        </Button>
-      </Paper>
-    </Layout>
+      <Button
+        variant="contained"
+        fullWidth
+        sx={{ mt: 2, bgcolor: "#ff80ab", "&:hover": { bgcolor: "#ff4f95" } }}
+        onClick={save}
+      >
+        Save Changes
+      </Button>
+    </PinkDialog>
   );
 }

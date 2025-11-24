@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material";
+import { AuthProvider } from "./context/AuthContext";  // Import the AuthProvider
 import "./styles/global.css";
 
 const theme = createTheme({
@@ -25,9 +26,11 @@ const theme = createTheme({
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
-      <ThemeProvider theme={theme}>
-        <App />
-      </ThemeProvider>
+      <AuthProvider>  {/* Wrap your app inside AuthProvider */}
+        <ThemeProvider theme={theme}>
+          <App />
+        </ThemeProvider>
+      </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

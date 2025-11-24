@@ -1,13 +1,33 @@
 import { useState } from "react";
-import { Box, Button, TextField, Typography, Paper } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Button, TextField, Typography, Paper, Box } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { axiosInstance } from "../../services/api";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const { login } = useAuth();  
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await axiosInstance.post("/auth/login", {
+        username,
+        password,
+      });
+      login(res.data);  
+      navigate("/");  
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Login failed");
+    }
+  };
 
   return (
-    <Box
+    
+    <Box 
       sx={{
         bgcolor: "#ffe4ee",
         minHeight: "100vh",
@@ -17,68 +37,51 @@ export default function Login() {
         padding: 2,
       }}
     >
-      <Paper
-        elevation={4}
-        sx={{
-          width: "100%",
-          maxWidth: 420,
-          padding: "32px",
-          borderRadius: "16px",
-          textAlign: "center",
-          backgroundColor: "#fff",
-        }}
-      >
-        <Typography variant="h5" fontWeight="bold" color="primary">
-          Welcome Back 💗
-        </Typography>
+      <Paper sx={{ padding: 4, maxWidth: 400 }}>
+      <Typography variant="h5" color="primary" fontWeight="bold">
+        Welcome Back 💗
+      </Typography>
 
-        <Typography sx={{ mt: 1, mb: 3, color: "#555" }}>
-          Login to your cosmetic shop dashboard
-        </Typography>
+      {error && <Typography color="error">{error}</Typography>}
 
+      <form onSubmit={handleSubmit}>
         <TextField
-          fullWidth
           label="Username"
-          variant="outlined"
+          fullWidth
           sx={{ mb: 2 }}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
 
         <TextField
-          fullWidth
           label="Password"
           type="password"
-          variant="outlined"
-          sx={{ mb: 3 }}
+          fullWidth
+          sx={{ mb: 2 }}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
         <Button
-          fullWidth
           variant="contained"
-          size="large"
+          fullWidth
           sx={{
             bgcolor: "#ff80ab",
-            color: "#fff",
-            py: 1.3,
-            borderRadius: "10px",
-            "&:hover": {
-              bgcolor: "#ff4f95",
-            },
+            "&:hover": { bgcolor: "#ff4f95" },
           }}
+          type="submit"
         >
           Login
         </Button>
+      </form>
 
-        <Typography sx={{ mt: 2 }}>
-          Don’t have an account?{" "}
-          <Link to="/register" style={{ color: "#ff4f95", fontWeight: "bold" }}>
-            Register
-          </Link>
-        </Typography>
-      </Paper>
+      <Typography sx={{ mt: 2 }}>
+        Don't have an account?{" "}
+        <Link to="/register" style={{ color: "#ff4f95", fontWeight: "bold" }}>
+          Register
+        </Link>
+      </Typography>
+    </Paper>
     </Box>
   );
 }
